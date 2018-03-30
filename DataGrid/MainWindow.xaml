@@ -1,0 +1,159 @@
+﻿<Window x:Class="DataGrid.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:System="clr-namespace:System;assembly=mscorlib" 
+        xmlns:l="clr-namespace:DataGrid" Title="MainWindow" Height="350" Width="525">
+    <Window.Resources>
+        <ObjectDataProvider x:Key="selectionUnits" 
+                        MethodName="GetNames" ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="DataGridSelectionUnit" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="selectionModes" 
+                        MethodName="GetNames" ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="DataGridSelectionMode" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="headersVisibility" 
+                        MethodName="GetNames" ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="DataGridHeadersVisibility" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <l:GenderTemplateSelector x:Key="genderTemplateSelector">
+            <l:GenderTemplateSelector.MaleTemplate>
+                <DataTemplate>
+                    <Grid Background="LightBlue">
+                        <Image Source="{Binding Image}" Width="50" />
+                    </Grid>
+                </DataTemplate>
+            </l:GenderTemplateSelector.MaleTemplate>
+            <l:GenderTemplateSelector.FemaleTemplate>
+                <DataTemplate>
+                    <Grid Background="Salmon">
+                        <Image Source="{Binding Image}" Width="50" />
+                    </Grid>
+                </DataTemplate>
+            </l:GenderTemplateSelector.FemaleTemplate>
+        </l:GenderTemplateSelector>
+    </Window.Resources>
+    <Grid>
+        <TabControl TabStripPlacement="Left">
+            <TabItem Header="Auto Column Generation">
+                <DataGrid ItemsSource="{Binding Customers}" />
+            </TabItem>
+            <TabItem Header="Define Manual Colums">
+                <DataGrid ItemsSource="{Binding Customers}" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" />
+                        <DataGridTemplateColumn Header="Image" Width="SizeToCells" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Height="80" Source="{Binding Image}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="Selection Modes">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8">
+                        <TextBlock VerticalAlignment="Center">Selection Mode:</TextBlock>
+                        <ComboBox Margin="8,0" x:Name="selectionMode" ItemsSource="{Binding Source={StaticResource selectionModes}}" SelectedIndex="0" />
+                        <TextBlock VerticalAlignment="Center" Margin="8,0">Selection Unit:</TextBlock>
+                        <ComboBox Margin="8,0" x:Name="selectionUnit" ItemsSource="{Binding Source={StaticResource selectionUnits}}" SelectedIndex="0" />
+                    </StackPanel>
+                    <DataGrid DockPanel.Dock="Top" ItemsSource="{Binding Customers}" 
+                              SelectionUnit="{Binding SelectedItem, ElementName=selectionUnit}"
+                              SelectionMode="{Binding SelectedItem, ElementName=selectionMode}"/>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Sort, Reoder and Resize">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8" >
+                        <CheckBox x:Name="canUserReorder" Content="Allow Reorder" />
+                        <CheckBox Margin="8,0,0,0" x:Name="canUserResizeRows" Content="Allow Row Resizing" />
+                        <CheckBox Margin="8,0,0,0" x:Name="canUserResizeColumns" Content="Allow Column Resizing" />
+                        <CheckBox Margin="8,0,0,0" x:Name="canUserSort" Content="Allow Sorting" />
+                    </StackPanel>
+                    <DataGrid DockPanel.Dock="Top" ItemsSource="{Binding Customers}" 
+                              CanUserReorderColumns="{Binding IsChecked, ElementName=canUserReorder}" 
+                              CanUserResizeColumns="{Binding IsChecked, ElementName=canUserResizeColumns}"
+                              CanUserResizeRows="{Binding IsChecked, ElementName=canUserResizeRows}"
+                              CanUserSortColumns="{Binding IsChecked, ElementName=canUserSort}"/>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Cell Details">
+                <DataGrid ItemsSource="{Binding Customers}">
+                    <DataGrid.RowDetailsTemplate>
+                        <DataTemplate>
+                            <Image Height="100" Source="{Binding Image}" />
+                        </DataTemplate>
+                    </DataGrid.RowDetailsTemplate>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="Cell Details TemplateSelector">
+                <DataGrid ItemsSource="{Binding Customers}" 
+                          RowDetailsTemplateSelector="{StaticResource genderTemplateSelector}" />
+            </TabItem>
+            <TabItem Header="Grouping">
+                <DataGrid ItemsSource="{Binding GroupedCustomers}">
+                    <DataGrid.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Path=Name}" FontWeight="Bold" Padding="3"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                            <GroupStyle.ContainerStyle>
+                                <Style TargetType="{x:Type GroupItem}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                <Expander>
+                                                    <Expander.Header>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Path=Name}" />
+                                                            <TextBlock Text="{Binding Path=ItemCount}" Margin="8,0,4,0"/>
+                                                            <TextBlock Text="Items"/>
+                                                        </StackPanel>
+                                                    </Expander.Header>
+                                                    <ItemsPresenter />
+                                                </Expander>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
+                        </GroupStyle>
+                    </DataGrid.GroupStyle>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="Alternating Background">
+<DataGrid ItemsSource="{Binding Customers}" 
+          AlternatingRowBackground="Gainsboro"  AlternationCount="2"/>
+            </TabItem>
+            <TabItem Header="Frozen columns">
+                <DataGrid ItemsSource="{Binding Customers}" FrozenColumnCount="2"  />
+            </TabItem>
+            <TabItem Header="Header Visibility">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8" >
+                        <ComboBox x:Name="headersVisibility" ItemsSource="{Binding Source={StaticResource headersVisibility}}" SelectedIndex="0" />
+                    </StackPanel>
+                    <DataGrid ItemsSource="{Binding Customers}" HeadersVisibility="{Binding SelectedItem, ElementName=headersVisibility}"  />
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Accessing selected cells">
+                <DockPanel>
+                    <Button DockPanel.Dock="Top" Click="GetSelectedCells" >Show selected cells</Button>
+                    <DataGrid x:Name="selectedCellsGrid" ItemsSource="{Binding Customers}" SelectionMode="Extended" SelectionUnit="Cell" />
+                </DockPanel> 
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
